@@ -90,8 +90,8 @@ type Config struct {
 	// Refresh token expiration settings
 	RefreshTokenPolicy *RefreshTokenPolicy
 
-	// If set, the server will use this connector to handle password grants
-	PasswordConnector string
+	// If set, the server will attempt to use a valid connector from this list to handle password grants
+	PasswordConnectors []string
 
 	GCFrequency time.Duration // Defaults to 5 minutes
 
@@ -167,7 +167,7 @@ type Server struct {
 	alwaysShowLogin bool
 
 	// Used for password grant
-	passwordConnector string
+	passwordConnectors []string
 
 	supportedResponseTypes map[string]bool
 
@@ -230,7 +230,7 @@ func newServer(ctx context.Context, c Config, rotationStrategy rotationStrategy)
 		supportedRes[respType] = true
 	}
 
-	if c.PasswordConnector != "" {
+	if len(c.PasswordConnectors) > 0 {
 		supportedGrant = append(supportedGrant, grantTypePassword)
 	}
 
@@ -276,7 +276,7 @@ func newServer(ctx context.Context, c Config, rotationStrategy rotationStrategy)
 		alwaysShowLogin:        c.AlwaysShowLoginScreen,
 		now:                    now,
 		templates:              tmpls,
-		passwordConnector:      c.PasswordConnector,
+		passwordConnectors:     c.PasswordConnectors,
 		logger:                 c.Logger,
 	}
 
